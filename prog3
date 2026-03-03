@@ -1,81 +1,34 @@
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.a pache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import java.io.IOException;
+import csv
+import pandas as pd
 
-public class GradeMapReduce {
+a = []
+d = pd.read_csv("enjoysport.csv")
+print(d)
 
-    
-    public static String mapGrades(int average) {
-        if (average >= 90) {
-            return "A";
-        } else if (average >= 80) {
-            return "B";
-        } else if (average >= 70) {
-            return "C";
-        } else if (average>=60) {
-            return "D";
-        } else {
-            return "F";
-        }
-    }
+with open('enjoysport.csv', 'r') as csvfile:
+    for row in csv.reader(csvfile):
+        a.append(row)
 
-    public static class GradeMapper extends Mapper<Object, Text, Text, IntWritable> {
+print("\n The total number of training instances are : ", len(a))
 
-        private Text studentName = new Text();
-        private IntWritable marks = new IntWritable();
+num_attribute = len(a[0]) - 1
 
-        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            String line = value.toString();
-            String[] parts = line.split("\\s+");
-            if (parts.length == 2) {
-                studentName.set(parts[0]);
-                marks.set(Integer.parseInt(parts[1]));
-                context.write(studentName, marks);
-            }
-        }
-    }
+print("\n The initial hypothesis is : ")
 
-    public static class GradeReducer extends Reducer<Text, IntWritable, Text, Text> {
+hypothesis = ['0'] * num_attribute
+print(hypothesis)
 
-        private Text result = new Text();
+for i in range(0, len(a)):
+    if a[i][num_attribute] == 'yes':
+        for j in range(0, num_attribute):
+            if hypothesis[j] == '0' or hypothesis[j] == a[i][j]
+                hypothesis[j] = a[i][j]
+            else:
+                hypothesis[j] = '?'
 
-        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-            int sum = 0;
-            int count = 0;
+        print("\n
+The hypothesis for the training instance {} is :\n"
+              .format(i+1), hypothesis)
 
-          
-            for (IntWritable val : values) {
-                sum += val.get();
-                count++;
-            }
-
-            int average = sum / count;
-            String letterGrade = mapGrades(average);
-  result.set(letterGrade);
-            context.write(key, result);
-        }
-    }
-
-    
-    public static void main(String[] args) throws Exception {
-        Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "GradeMapReduce");
-        job.setJarByClass(GradeMapReduce.class);
-        job.setMapperClass(GradeMapper.class);
-        job.setReducerClass(GradeReducer.class);
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntWritable.class);
-        FileInputFormat.addInputPath(job,new Path(args[0]));
-        FileOutputFormat.setOutputPath(job,new Path(args[1]));
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
-    }
-}
+print("\n The Maximally specific hypothesis for the training instance is ")
+print(hypothesis)
